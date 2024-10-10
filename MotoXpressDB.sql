@@ -33,4 +33,3 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'El usuario ya existe.');
     END IF;
 END;
-Select * From usuarios;
