@@ -95,6 +95,7 @@ CREATE TABLE PERSONA (
     usuario_modifico VARCHAR2(50)
 );
 
+-- cuidado al momento de crear la tabla usuario, si es necesario cambiar el nombre
 CREATE TABLE USUARIO (
     id_usuario NUMBER PRIMARY KEY,
     id_persona NUMBER,
