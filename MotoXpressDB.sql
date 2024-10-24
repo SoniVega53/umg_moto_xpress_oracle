@@ -62,7 +62,6 @@ CREATE TABLE USUARIO (
     usuario VARCHAR2(100),
     correo VARCHAR2(100),
     contrasena VARCHAR2(100),
-
     fecha_creacion DATE,
     fecha_modificacion DATE,
     usuario_creo VARCHAR2(50),
@@ -227,7 +226,6 @@ CREATE TABLE RESERVACION (
     fecha_inicio DATE,
     fecha_fin DATE,
     fecha_reservacion DATE,
-
     fecha_creacion DATE,
     fecha_modificacion DATE,
     usuario_creo VARCHAR2(50),
@@ -250,4 +248,47 @@ VALUES (2, 'cliente', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23',
 INSERT INTO ROL (id_rol, nombre, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (3, 'gestor', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'), USER, USER);
 
+--- triggers
 
+CREATE OR REPLACE TRIGGER trg_persona_insert_update
+BEFORE INSERT OR UPDATE ON PERSONA
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        :NEW.id_persona  := persona_seq.NEXTVAL;
+        IF :NEW.fecha_creacion IS NULL THEN
+            :NEW.fecha_creacion := SYSDATE;
+        END IF;
+        IF :NEW.usuario_creo IS NULL THEN
+            :NEW.usuario_creo := NVL(USER, USER);
+        END IF;
+    END IF;
+
+    :NEW.fecha_modificacion := SYSDATE;
+
+    IF :NEW.usuario_modifico IS NULL THEN
+        :NEW.usuario_modifico := NVL(USER, USER);
+    END IF;
+    
+END;
+
+CREATE OR REPLACE TRIGGER trg_usuario_insert_update
+BEFORE INSERT OR UPDATE ON USUARIO
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        :NEW.id_usuario  := usuario_seq.NEXTVAL;
+        IF :NEW.fecha_creacion IS NULL THEN
+            :NEW.fecha_creacion := SYSDATE;
+        END IF;
+        IF :NEW.usuario_creo IS NULL THEN
+            :NEW.usuario_creo := NVL(USER, USER);
+        END IF;
+    END IF;
+
+    :NEW.fecha_modificacion := SYSDATE;
+
+    IF :NEW.usuario_modifico IS NULL THEN
+        :NEW.usuario_modifico := NVL(USER, USER);
+    END IF;
+END;
