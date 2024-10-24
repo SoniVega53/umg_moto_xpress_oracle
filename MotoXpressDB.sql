@@ -48,6 +48,14 @@ CREATE SEQUENCE imagen_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE tipo_estado_motocicleta_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE motocicleta_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE zona_geografica_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE inventario_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE tipo_pago_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE pago_estado_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE pago_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE metodo_renta_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE tipo_estado_reservacion_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE reservacion_seq START WITH 1 INCREMENT BY 1;
+
 
 CREATE TABLE ROL (
     id_rol NUMBER PRIMARY KEY,
@@ -129,7 +137,7 @@ CREATE TABLE MARCA_MODELO (
 CREATE TABLE IMAGEN (
     id_imagen NUMBER PRIMARY KEY,
     nombre VARCHAR2(100),
-    url  VARCHAR2(4000),
+    url VARCHAR2(4000),
 
     fecha_creacion DATE,
     fecha_modificacion DATE,
@@ -167,14 +175,106 @@ CREATE TABLE MOTOCICLETA (
 
 CREATE TABLE ZONA_GEOGRAFICA (
     id_zona_geografica NUMBER PRIMARY KEY,
-    nombre_zona  VARCHAR2(100),
+    nombre_zona VARCHAR2(100),
     codigo_postal NUMBER,
-    region  VARCHAR2(100),
-    ciudad  VARCHAR2(100),
-    direccion  VARCHAR2(100),
+    region VARCHAR2(100),
+    ciudad VARCHAR2(100),
+    direccion VARCHAR2(100),
 
     fecha_creacion DATE,
     fecha_modificacion DATE,
     usuario_creo VARCHAR2(50),
     usuario_modifico VARCHAR2(50)
+);
+
+CREATE TABLE INVENTARIO (
+    id_inventario NUMBER PRIMARY KEY,
+    id_zona_geografica NUMBER,
+    id_motocicleta NUMBER,
+    kilometraje NUMBER,
+    fecha_disponibilidad DATE,
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50),
+    CONSTRAINT fk_zona_geografica FOREIGN KEY (id_zona_geografica) REFERENCES ZONA_GEOGRAFICA(id_zona_geografica),
+    CONSTRAINT fk_motocicleta FOREIGN KEY (id_motocicleta) REFERENCES MOTOCICLETA(id_motocicleta)
+);
+
+CREATE TABLE TIPO_PAGO (
+    id_tipo_pago NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(250),
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50)
+);
+
+CREATE TABLE PAGO_ESTADO (
+    id_pago_estado NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(250),
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50)
+);
+
+CREATE TABLE PAGO (
+    id_pago NUMBER PRIMARY KEY,
+    id_tipo_pago NUMBER,
+    id_pago_estado NUMBER,
+    monto NUMBER,
+    fecha_pago DATE,
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50),
+    CONSTRAINT fk_tipo_pago FOREIGN KEY (id_tipo_pago) REFERENCES TIPO_PAGO(id_tipo_pago),
+    CONSTRAINT fk_pago_estado FOREIGN KEY (id_pago_estado) REFERENCES PAGO_ESTADO(id_pago_estado)
+);
+
+CREATE TABLE METODO_RENTA (
+    id_metodo_renta NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(250),
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50)
+);
+
+CREATE TABLE TIPO_ESTADO_RESERVACION (
+    id_tipo_estado_reservacion NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(250),
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50)
+);
+
+CREATE TABLE RESERVACION (
+    id_reservacion NUMBER PRIMARY KEY,
+    id_usuario NUMBER,
+    id_tipo_estado_reservacion NUMBER,
+    id_metodo_renta NUMBER,
+    id_pago NUMBER,
+    id_inventario NUMBER,
+    fecha_inicio DATE,
+    fecha_fin DATE,
+    fecha_reservacion DATE,
+
+    fecha_creacion DATE,
+    fecha_modificacion DATE,
+    usuario_creo VARCHAR2(50),
+    usuario_modifico VARCHAR2(50),
+    CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario),
+    CONSTRAINT fk_tipo_estado_reservacion FOREIGN KEY (id_tipo_estado_reservacion) REFERENCES TIPO_ESTADO_RESERVACION(id_tipo_estado_reservacion),
+    CONSTRAINT fk_metodo_renta FOREIGN KEY (id_metodo_renta) REFERENCES METODO_RENTA(id_metodo_renta),
+    CONSTRAINT fk_pago FOREIGN KEY (id_pago) REFERENCES PAGO(id_pago),
+    CONSTRAINT fk_inventario FOREIGN KEY (id_inventario) REFERENCES INVENTARIO(id_inventario)
 );
