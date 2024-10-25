@@ -1,3 +1,6 @@
+
+
+
 -- Script para base de datos para proyecto final en Oracle
 
 CREATE SEQUENCE rol_seq START WITH 1 INCREMENT BY 1;
@@ -242,30 +245,86 @@ CREATE TABLE RESERVACION (
 
 INSERT INTO ROL (id_rol, nombre, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (1, 'Admin', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'), 'admin', 'admin');
+INSERT INTO ROL (id_rol, nombre, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (2, 'Cliente', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'), 'admin', 'admin');
+INSERT INTO ROL (id_rol, nombre, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (3, 'Gestor', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO TIPO_PAGO (id_tipo_pago, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (1, 'Efectivo', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+INSERT INTO TIPO_PAGO (id_tipo_pago, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (2, 'Tarjeta', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO TIPO_ESTADO_MOTOCICLETA (id_tipo_estado_motocicleta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (1, 'Disponible', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+INSERT INTO TIPO_ESTADO_MOTOCICLETA (id_tipo_estado_motocicleta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (2, 'No Disponible', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+INSERT INTO TIPO_ESTADO_MOTOCICLETA (id_tipo_estado_motocicleta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (3, 'Mantenimiento', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO TIPO_ESTADO_RESERVACION (id_tipo_estado_reservacion, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (1, 'Disponible', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+INSERT INTO TIPO_ESTADO_RESERVACION (id_tipo_estado_reservacion, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (2, 'No Disponible', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO METODO_RENTA (id_metodo_renta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (1, 'Kilometraje', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+INSERT INTO METODO_RENTA (id_metodo_renta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (2, 'Kilometraje libre', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+INSERT INTO METODO_RENTA (id_metodo_renta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (3, 'Fecha', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO PAGO_ESTADO (id_pago_estado, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
-VALUES (1, 'Pagado', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+VALUES (1, 'Pagado', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');x
+INSERT INTO PAGO_ESTADO (id_pago_estado, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (2, 'Pendiente', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+
+
+
+--- triggers Usuarios
+
+CREATE OR REPLACE TRIGGER trg_persona_insert_update
+BEFORE INSERT OR UPDATE ON PERSONA
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        :NEW.id_persona  := persona_seq.NEXTVAL;
+        IF :NEW.fecha_creacion IS NULL THEN
+            :NEW.fecha_creacion := SYSDATE;
+        END IF;
+        IF :NEW.usuario_creo IS NULL THEN
+            :NEW.usuario_creo := NVL(USER, USER);
+        END IF;
+    END IF;
+
+    :NEW.fecha_modificacion := SYSDATE;
+
+    IF :NEW.usuario_modifico IS NULL THEN
+        :NEW.usuario_modifico := NVL(USER, USER);
+    END IF;
+    
+END;
+
+CREATE OR REPLACE TRIGGER trg_usuario_insert_update
+BEFORE INSERT OR UPDATE ON USUARIO
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        :NEW.id_usuario  := usuario_seq.NEXTVAL;
+        IF :NEW.fecha_creacion IS NULL THEN
+            :NEW.fecha_creacion := SYSDATE;
+        END IF;
+        IF :NEW.usuario_creo IS NULL THEN
+            :NEW.usuario_creo := NVL(USER, USER);
+        END IF;
+    END IF;
+
+    :NEW.fecha_modificacion := SYSDATE;
+
+    IF :NEW.usuario_modifico IS NULL THEN
+        :NEW.usuario_modifico := NVL(USER, USER);
+    END IF;
+END;
 
 
 --TRIGGERS PARA BITACORA
