@@ -758,7 +758,7 @@ JOIN USUARIO u ON r.id_usuario = u.id_usuario
 JOIN PERSONA p ON u.id_persona = p.id_persona
 JOIN INVENTARIO i ON r.id_inventario = i.id_inventario
 JOIN MOTOCICLETA m ON i.id_motocicleta = m.id_motocicleta
-WHERE r.id_tipo_estado_reservacion = 1; -- Suponiendo 1 es Confirmada
+WHERE r.id_tipo_estado_reservacion = 1;
 
 
 --Funciones
