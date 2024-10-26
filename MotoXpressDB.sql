@@ -1,6 +1,3 @@
-
-
-
 -- Script para base de datos para proyecto final en Oracle
 
 CREATE SEQUENCE rol_seq START WITH 1 INCREMENT BY 1;
@@ -263,9 +260,9 @@ INSERT INTO TIPO_ESTADO_MOTOCICLETA (id_tipo_estado_motocicleta, descripcion, fe
 VALUES (3, 'Mantenimiento', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO TIPO_ESTADO_RESERVACION (id_tipo_estado_reservacion, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
-VALUES (1, 'Disponible', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+VALUES (1, 'Confirmada', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 INSERT INTO TIPO_ESTADO_RESERVACION (id_tipo_estado_reservacion, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
-VALUES (2, 'No Disponible', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
+VALUES (2, 'Cancelada', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
 
 INSERT INTO METODO_RENTA (id_metodo_renta, descripcion, fecha_creacion, fecha_modificacion, usuario_creo, usuario_modifico)
 VALUES (1, 'Kilometraje', TO_DATE('2024-10-23', 'YYYY-MM-DD'), TO_DATE('2024-10-23', 'YYYY-MM-DD'),  'admin', 'admin');
@@ -742,3 +739,91 @@ BEGIN
 END;
 
 
+--Vistas
+
+--Muestra las motocicletas que estan actualmente reservadas mostrando las activas
+CREATE VIEW Vista_Motocicletas_Disponibles AS
+SELECT m.id_motocicleta, m.id_marca, m.cilindraje, m.capacidad, e.descripcion AS estado
+FROM MOTOCICLETA m
+JOIN TIPO_ESTADO_MOTOCICLETA e ON m.id_tipo_estado_motocicleta = e.id_tipo_estado_motocicleta
+WHERE e.descripcion = 'Disponible';
+
+
+--Muestra las reservaciones activas
+
+CREATE VIEW Vista_Reservaciones_Activas AS
+SELECT r.id_reservacion, p.nombre AS cliente, m.nombre AS modelo, r.fecha_inicio, r.fecha_fin
+FROM RESERVACION r
+JOIN USUARIO u ON r.id_usuario = u.id_usuario
+JOIN PERSONA p ON u.id_persona = p.id_persona
+JOIN INVENTARIO i ON r.id_inventario = i.id_inventario
+JOIN MOTOCICLETA m ON i.id_motocicleta = m.id_motocicleta
+WHERE r.id_tipo_estado_reservacion = 1; -- Suponiendo 1 es Confirmada
+
+
+--Funciones
+
+--Esta Funcion permite hacer el calculo de la penalizacion 
+CREATE OR REPLACE FUNCTION calcular_penalizacion(fecha_cancelacion DATE, fecha_inicio DATE) 
+RETURN NUMBER IS
+    penalizacion NUMBER;
+BEGIN
+    IF fecha_cancelacion >= (fecha_inicio - INTERVAL '36' HOUR) THEN
+        penalizacion := 0;
+    ELSE
+        penalizacion := 0.1; --La penalizacion esta basada en un 10%
+    END IF;
+    RETURN penalizacion;
+END;
+
+
+--ROLES
+
+CREATE ROLE ADMINISTRADOR;
+CREATE ROLE CLIENTE; 
+CREATE ROLE GESTOR;
+
+
+--PERMISOS PARA ADMINISTRADOR
+GRANT SELECT, INSERT, UPDATE, DELETE ON ROL TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON BITACORA TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON PERSONA TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USUARIO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON MODELO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON MARCA_MODELO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON IMAGEN TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TIPO_ESTADO_MOTOCICLETA TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON MOTOCICLETA TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ZONA_GEOGRAFICA TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON INVENTARIO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TIPO_PAGO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON PAGO_ESTADO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON PAGO TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON METODO_RENTA TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TIPO_ESTADO_RESERVACION TO ADMINISTRADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON RESERVACION TO ADMINISTRADOR;
+GRANT EXECUTE ON calcular_penalizacion TO ADMINISTRADOR;
+GRANT SELECT ON Vista_Motocicletas_Disponibles TO ADMINISTRADOR;
+GRANT SELECT ON Vista_Reservaciones_Activas TO ADMINISTRADOR;
+
+
+--PERMISOS PARA CLIENTE 
+GRANT SELECT ON Vista_Motocicletas_Disponibles TO CLIENTE;
+GRANT SELECT ON MARCA_MODELO TO CLIENTE;
+GRANT SELECT, INSERT ON RESERVACION TO CLIENTE;  
+GRANT SELECT, INSERT ON PAGO TO CLIENTE;          
+GRANT SELECT ON TIPO_PAGO TO CLIENTE;
+GRANT SELECT ON METODO_RENTA TO CLIENTE;
+
+
+--PERMISOS PARA GESTOR
+GRANT SELECT, INSERT, UPDATE ON MOTOCICLETA TO GESTOR;         
+GRANT SELECT, INSERT, UPDATE ON INVENTARIO TO GESTOR;             
+GRANT SELECT, INSERT, UPDATE ON ZONA_GEOGRAFICA TO GESTOR;        
+GRANT SELECT, INSERT, UPDATE ON MARCA_MODELO TO GESTOR;           
+GRANT SELECT ON TIPO_ESTADO_MOTOCICLETA TO GESTOR;               
+GRANT SELECT ON Vista_Motocicletas_Disponibles TO GESTOR;
+GRANT SELECT ON Vista_Reservaciones_Activas TO GESTOR;
+GRANT SELECT ON PAGO TO GESTOR;                                   
+GRANT SELECT ON METODO_RENTA TO GESTOR;
+GRANT SELECT ON TIPO_PAGO TO GESTOR;
